@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VendasFlow — Anúncios</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',sans-serif; background:#0f0f13; color:#e0e0e0; min-height:100vh; }
+
+    header {
+      background:#16161e; border-bottom:1px solid #2a2a3a;
+      padding:14px 32px; display:flex; align-items:center; justify-content:space-between;
+    }
+    header h1 { font-size:18px; font-weight:700; color:#fff; }
+    nav a { color:#888; padding:5px 14px; border-radius:6px; font-size:13px; text-decoration:none; }
+    nav a.active { color:#fff; background:#2a2a3a; }
+
+    .container { padding:24px 32px; max-width:1400px; margin:0 auto; }
+    .section-title { font-size:11px; font-weight:700; color:#555; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+
+    .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    .card { background:#16161e; border:1px solid #2a2a3a; border-radius:10px; padding:18px; }
+    .card .label { font-size:11px; color:#555; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+    .card .value { font-size:28px; font-weight:700; }
+    .card .sub { font-size:11px; color:#444; margin-top:4px; }
+
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+    .box { background:#16161e; border:1px solid #2a2a3a; border-radius:10px; padding:18px; }
+
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th { text-align:left; color:#444; font-weight:600; padding:8px 12px; border-bottom:1px solid #1f1f2e; font-size:11px; text-transform:uppercase; }
+    td { padding:10px 12px; border-bottom:1px solid #1a1a24; color:#bbb; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#1c1c28; }
+
+    .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+    .b-meta   { background:#1a2f5e; color:#4e8df5; }
+    .b-google { background:#3b1414; color:#ea4335; }
+    .b-good   { background:#14532d; color:#4ade80; }
+    .b-bad    { background:#450a0a; color:#f87171; }
+    .b-ok     { background:#713f12; color:#fbbf24; }
+
+    .platform-tabs { display:flex; gap:8px; margin-bottom:20px; }
+    .tab { padding:7px 18px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; border:1px solid #2a2a3a; color:#888; background:#16161e; }
+    .tab.active { border-color:#4e8df5; color:#4e8df5; background:#1a2040; }
+
+    .btn { padding:7px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; border:1px solid; }
+    .btn-gray { background:#1e1e2e; border-color:#3a3a5a; color:#888; }
+    .btn:hover { opacity:.85; }
+
+    .bar-wrap { width:100%; background:#2a2a3a; border-radius:3px; height:6px; margin-top:6px; }
+    .bar-fill { height:6px; border-radius:3px; }
+
+    .stat-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #1a1a24; }
+    .stat-row:last-child { border-bottom:none; }
+    .stat-label { font-size:12px; color:#666; }
+    .stat-val { font-size:15px; font-weight:700; }
+
+    .platform-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+    .pi-meta { background:#1a2f5e; }
+    .pi-google { background:#1f1414; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:20px">
+    <h1>⚡ VendasFlow</h1>
+    <nav style="display:flex;gap:4px">
+      <a href="/">Dashboard</a>
+      <a href="/ads" class="active">Anúncios</a>
+    </nav>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button class="btn btn-gray" onclick="loadAll()">↻ Atualizar</button>
+    <span id="last-upd" style="font-size:11px;color:#444">—</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Cards de performance geral -->
+  <div class="section-title">Performance Geral</div>
+  <div class="cards">
+    <div class="card">
+      <div class="label">Leads de Anúncios</div>
+      <div class="value" style="color:#60a5fa" id="total-ad-leads">0</div>
+      <div class="sub">Meta + Google</div>
+    </div>
+    <div class="card">
+      <div class="label">Leads Inbound</div>
+      <div class="value" style="color:#a78bfa" id="inbound-total">0</div>
+      <div class="sub">clicaram e enviaram msg</div>
+    </div>
+    <div class="card">
+      <div class="label">Calls de Anúncios</div>
+      <div class="value" style="color:#4ade80" id="calls-ads">0</div>
+      <div class="sub">agendamentos via ads</div>
+    </div>
+    <div class="card">
+      <div class="label">Melhor Canal</div>
+      <div class="value" style="color:#fb923c;font-size:18px" id="best-channel">—</div>
+      <div class="sub">mais agendamentos</div>
+    </div>
+  </div>
+
+  <!-- Meta + Google lado a lado -->
+  <div class="grid2">
+
+    <!-- Meta Ads -->
+    <div class="box">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div class="platform-icon pi-meta">📣</div>
+        <div>
+          <div style="font-weight:700;color:#fff">Meta Ads</div>
+          <div style="font-size:11px;color:#555">Facebook + Instagram</div>
+        </div>
+      </div>
+      <div id="meta-stats">
+        <div style="color:#444">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- Google Ads -->
+    <div class="box">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div class="platform-icon pi-google">🔍</div>
+        <div>
+          <div style="font-weight:700;color:#fff">Google Ads</div>
+          <div style="font-size:11px;color:#555">Search + Display</div>
+        </div>
+      </div>
+      <div id="google-stats">
+        <div style="color:#444">Carregando...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Top anúncios -->
+  <div class="box" style="margin-bottom:24px">
+    <div class="section-title" style="margin-bottom:14px">Top Anúncios por Agendamento</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Anúncio</th>
+          <th>Plataforma</th>
+          <th>Leads</th>
+          <th>Agendamentos</th>
+          <th>Taxa</th>
+          <th>Performance</th>
+        </tr>
+      </thead>
+      <tbody id="top-ads-tb">
+        <tr><td colspan="6" style="color:#444;text-align:center;padding:20px">Configure Meta Ads ou Google Ads no .env para ver dados aqui.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Keywords Google Ads -->
+  <div class="grid2" style="margin-bottom:24px">
+    <div class="box">
+      <div class="section-title" style="margin-bottom:14px">🔍 Keywords Ativas — Google Ads</div>
+      <table>
+        <thead>
+          <tr><th>Keyword</th><th>Tipo</th><th>Cliques</th><th>CTR</th><th>CPC</th><th>Conversões</th></tr>
+        </thead>
+        <tbody id="kw-active-tb">
+          <tr><td colspan="6" style="color:#444;text-align:center;padding:16px">Configure GOOGLE_ADS_DEVELOPER_TOKEN no .env</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box">
+      <div class="section-title" style="margin-bottom:14px">💡 Sugestões de Keywords (Keyword Planner)</div>
+      <table>
+        <thead>
+          <tr><th>Keyword</th><th>Buscas/mês</th><th>Competição</th><th>CPC min</th><th>CPC max</th></tr>
+        </thead>
+        <tbody id="kw-ideas-tb">
+          <tr><td colspan="5" style="color:#444;text-align:center;padding:16px">Configure Google Ads para ver sugestões</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Leads de anúncios recentes -->
+  <div class="box">
+    <div class="section-title" style="margin-bottom:14px">Leads Recentes de Anúncios</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Anúncio</th>
+          <th>Plataforma</th>
+          <th>Intent</th>
+          <th>Respondeu</th>
+          <th>Agendado</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody id="ad-leads-tb">
+        <tr><td colspan="7" style="color:#444;text-align:center;padding:20px">Nenhum lead de anúncio ainda.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const TOKEN = "{{ token }}";
+
+async function api(path) {
+  try {
+    const sep = path.includes('?') ? '&' : '?';
+    const r = await fetch(path + sep + 'token=' + TOKEN);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+function statRow(label, val, color) {
+  return `<div class="stat-row">
+    <span class="stat-label">${label}</span>
+    <span class="stat-val" style="color:${color||'#fff'}">${val}</span>
+  </div>`;
+}
+
+function perfBadge(leads, scheduled) {
+  if (!leads) return '<span class="badge b-ok">Sem dados</span>';
+  const rate = scheduled / leads;
+  if (rate >= 0.1) return '<span class="badge b-good">🔥 Ótimo</span>';
+  if (rate >= 0.05) return '<span class="badge b-ok">🟡 Regular</span>';
+  return '<span class="badge b-bad">❌ Baixo</span>';
+}
+
+async function loadAll() {
+  const [adStats, adLeads] = await Promise.all([
+    api('/api/ads/stats'),
+    api('/api/ads/leads'),
+  ]);
+
+  if (adStats) {
+    const bySource = adStats.by_source || [];
+    const metaData   = bySource.find(s => s.source === 'meta')   || {leads:0, scheduled:0};
+    const googleData = bySource.find(s => s.source === 'google') || {leads:0, scheduled:0};
+    const totalLeads = (metaData.leads||0) + (googleData.leads||0);
+    const totalCalls = (metaData.scheduled||0) + (googleData.scheduled||0);
+
+    document.getElementById('total-ad-leads').textContent = totalLeads;
+    document.getElementById('inbound-total').textContent  = adStats.inbound_total || 0;
+    document.getElementById('calls-ads').textContent      = totalCalls;
+
+    const bestCh = metaData.scheduled >= googleData.scheduled ? 'Meta Ads' : 'Google Ads';
+    document.getElementById('best-channel').textContent = totalCalls > 0 ? bestCh : '—';
+
+    // Meta stats
+    const metaRate = metaData.leads > 0 ? ((metaData.scheduled/metaData.leads)*100).toFixed(1) : '0';
+    document.getElementById('meta-stats').innerHTML =
+      statRow('Total de leads', metaData.leads, '#60a5fa') +
+      statRow('Calls agendadas', metaData.scheduled, '#4ade80') +
+      statRow('Taxa de conversão', metaRate + '%', metaRate >= 10 ? '#4ade80' : metaRate >= 5 ? '#fbbf24' : '#f87171') +
+      `<div style="margin-top:12px;font-size:11px;color:#555">
+        <a href="https://business.facebook.com" target="_blank" style="color:#4e8df5">→ Abrir Gerenciador Meta</a>
+      </div>`;
+
+    // Google stats
+    const gRate = googleData.leads > 0 ? ((googleData.scheduled/googleData.leads)*100).toFixed(1) : '0';
+    document.getElementById('google-stats').innerHTML =
+      statRow('Total de leads', googleData.leads, '#60a5fa') +
+      statRow('Calls agendadas', googleData.scheduled, '#4ade80') +
+      statRow('Taxa de conversão', gRate + '%', gRate >= 10 ? '#4ade80' : gRate >= 5 ? '#fbbf24' : '#f87171') +
+      `<div style="margin-top:12px;font-size:11px;color:#555">
+        <a href="https://ads.google.com" target="_blank" style="color:#ea4335">→ Abrir Google Ads</a>
+      </div>`;
+
+    // Top ads
+    const topAds = adStats.top_ads || [];
+    if (topAds.length) {
+      document.getElementById('top-ads-tb').innerHTML = topAds.map(ad => {
+        const rate = ad.total_leads > 0 ? ((ad.scheduled/ad.total_leads)*100).toFixed(1) : '0';
+        const srcBadge = ad.source === 'meta'
+          ? '<span class="badge b-meta">📣 Meta</span>'
+          : '<span class="badge b-google">🔍 Google</span>';
+        return `<tr>
+          <td>${ad.ad_name || ad.ad_id || '—'}</td>
+          <td>${srcBadge}</td>
+          <td style="color:#60a5fa">${ad.total_leads}</td>
+          <td style="color:#4ade80">${ad.scheduled}</td>
+          <td>${rate}%</td>
+          <td>${perfBadge(ad.total_leads, ad.scheduled)}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  if (adLeads && adLeads.length) {
+    document.getElementById('ad-leads-tb').innerHTML = adLeads.map(l => {
+      const srcBadge = l.ad_source === 'meta'
+        ? '<span class="badge b-meta">📣 Meta</span>'
+        : '<span class="badge b-google">🔍 Google</span>';
+      return `<tr>
+        <td>${l.full_name || l.username || '—'}</td>
+        <td style="color:#666;font-size:12px">${l.ad_name || '—'}</td>
+        <td>${srcBadge}</td>
+        <td><span class="badge ${l.intent_score==='high'?'b-good':l.intent_score==='medium'?'b-ok':'b-bad'}">${l.intent_score}</span></td>
+        <td>${l.responded ? '<span style="color:#4ade80">✅ Sim</span>' : '<span style="color:#444">Não</span>'}</td>
+        <td>${l.call_scheduled ? '<span style="color:#ec4899">📅 Sim</span>' : '<span style="color:#444">Não</span>'}</td>
+        <td style="font-size:11px;color:#444">${l.created_at ? new Date(l.created_at).toLocaleString('pt-BR') : '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('last-upd').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR');
+}
+
+async function loadKeywords() {
+  const r = await api('/api/google/keywords');
+  if (!r || r.error) return;
+
+  const compColor = {'LOW':'#4ade80','MEDIUM':'#fbbf24','HIGH':'#f87171'};
+
+  if (r.keywords && r.keywords.length) {
+    document.getElementById('kw-active-tb').innerHTML = r.keywords.map(k => `
+      <tr>
+        <td style="color:#fff">${k.keyword}</td>
+        <td><span class="badge b-google" style="font-size:10px">${k.match_type}</span></td>
+        <td style="color:#60a5fa">${k.clicks}</td>
+        <td>${k.ctr}%</td>
+        <td>R$ ${k.avg_cpc_brl}</td>
+        <td style="color:#4ade80">${k.conversions}</td>
+      </tr>`).join('');
+  }
+
+  if (r.ideas && r.ideas.length) {
+    document.getElementById('kw-ideas-tb').innerHTML = r.ideas.map(k => `
+      <tr>
+        <td style="color:#fff">${k.keyword}</td>
+        <td style="color:#60a5fa">${k.avg_monthly_searches.toLocaleString('pt-BR')}</td>
+        <td style="color:${compColor[k.competition]||'#aaa'}">${k.competition}</td>
+        <td>R$ ${k.low_cpc_brl}</td>
+        <td>R$ ${k.high_cpc_brl}</td>
+      </tr>`).join('');
+  }
+}
+
+loadAll();
+loadKeywords();
+setInterval(loadAll, 60000);
+setInterval(loadKeywords, 300000); // a cada 5 min
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Core
+anthropic==0.25.0
+python-dotenv==1.0.1
+schedule==1.2.1
+requests==2.31.0
+
+# Instagram
+instagrapi==2.1.2
+
+# Database
+sqlalchemy==2.0.30
+
+# Web / Dashboard
+flask==3.0.3
+flask-limiter==3.5.0
+
+# Email
+sendgrid==6.11.0
+
+# Prospecting
+apify-client==1.7.1
+
+# Security
+cryptography==42.0.5
+PyJWT==2.8.0
+
+# Async
+aiohttp==3.9.5
+
+# Ads (Google)
+google-ads==30.0.0

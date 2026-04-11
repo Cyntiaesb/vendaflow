@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VendasFlow — Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f0f13; color: #e0e0e0; min-height: 100vh; }
+
+    header {
+      background: #16161e;
+      border-bottom: 1px solid #2a2a3a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    .container { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+    .section-title { font-size: 11px; font-weight: 700; color: #555; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Cards */
+    .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+    .card { background: #16161e; border: 1px solid #2a2a3a; border-radius: 10px; padding: 18px; }
+    .card .label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .card .value { font-size: 30px; font-weight: 700; }
+    .card .sub { font-size: 11px; color: #444; margin-top: 4px; }
+    .c-blue .value { color: #60a5fa; }
+    .c-white .value { color: #fff; }
+    .c-orange .value { color: #fb923c; }
+    .c-green .value { color: #4ade80; }
+    .c-purple .value { color: #a78bfa; }
+
+    /* Pipeline */
+    .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+    .pipe-col { background: #16161e; border: 1px solid #2a2a3a; border-radius: 10px; padding: 16px; }
+    .pipe-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .pipe-num { font-size: 26px; font-weight: 700; color: #fff; }
+    .pipe-bar { height: 3px; border-radius: 2px; margin-top: 10px; }
+
+    /* Grid 2 */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+    /* Box */
+    .box { background: #16161e; border: 1px solid #2a2a3a; border-radius: 10px; padding: 18px; }
+
+    /* Source rows */
+    .src-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .src-label { font-size: 13px; color: #aaa; width: 140px; flex-shrink: 0; }
+    .src-bar-wrap { flex: 1; background: #2a2a3a; border-radius: 3px; height: 5px; }
+    .src-bar { height: 5px; border-radius: 3px; transition: width .4s; }
+    .src-val { font-size: 15px; font-weight: 700; color: #fff; width: 40px; text-align: right; }
+
+    /* Log */
+    .log-box { background: #0a0a10; border: 1px solid #1a1a2a; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; height: 220px; overflow-y: auto; }
+    .log-line { padding: 2px 0; color: #555; }
+    .log-info { color: #60a5fa; }
+    .log-error { color: #f87171; }
+    .log-warn { color: #fbbf24; }
+
+    /* Tabela */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; color: #444; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid #1f1f2e; font-size: 11px; text-transform: uppercase; }
+    td { padding: 9px 10px; border-bottom: 1px solid #1a1a24; color: #bbb; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1c1c28; }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .bh { background: #14532d; color: #4ade80; }
+    .bm { background: #713f12; color: #fbbf24; }
+    .bl { background: #1f2937; color: #6b7280; }
+    .bi { background: #4c1d95; color: #c4b5fd; }
+    .ba { background: #1e3a5f; color: #60a5fa; }
+    .bg { background: #14401a; color: #4ade80; }
+
+    /* Buttons */
+    .btn { padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; border: 1px solid; }
+    .btn-start { background: #14532d; border-color: #4ade80; color: #4ade80; }
+    .btn-stop  { background: #450a0a; border-color: #f87171; color: #f87171; }
+    .btn-gray  { background: #1e1e2e; border-color: #3a3a5a; color: #888; }
+    .btn:hover { opacity: .85; }
+
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .dot-on  { background: #4ade80; box-shadow: 0 0 5px #4ade80; }
+    .dot-off { background: #444; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:20px">
+    <h1>⚡ VendasFlow</h1>
+    <nav style="display:flex;gap:4px">
+      <a href="/" style="color:#fff;background:#2a2a3a;padding:5px 14px;border-radius:6px;font-size:13px;text-decoration:none">Dashboard</a>
+      <a href="/ads" style="color:#888;padding:5px 14px;border-radius:6px;font-size:13px;text-decoration:none">Anúncios</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <span id="camp-status"><span class="dot dot-off"></span>Parado</span>
+    <button class="btn btn-start" id="btn-start" onclick="startCamp()">▶ Iniciar</button>
+    <button class="btn btn-stop"  id="btn-stop"  onclick="stopCamp()" style="display:none">⏹ Pausar</button>
+    <button class="btn btn-gray"  onclick="loadAll()">↻ Atualizar</button>
+    <span id="last-upd" style="font-size:11px;color:#444">—</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Cards -->
+  <div class="cards">
+    <div class="card c-blue">
+      <div class="label">Total de Leads</div>
+      <div class="value" id="c-total">0</div>
+      <div class="sub">no banco de dados</div>
+    </div>
+    <div class="card c-white">
+      <div class="label">Contactados Hoje</div>
+      <div class="value" id="c-hoje">0</div>
+      <div class="sub">Instagram + WhatsApp</div>
+    </div>
+    <div class="card c-orange">
+      <div class="label">Responderam</div>
+      <div class="value" id="c-resp">0</div>
+      <div class="sub">qualquer canal</div>
+    </div>
+    <div class="card c-green">
+      <div class="label">Calls Agendadas</div>
+      <div class="value" id="c-calls">0</div>
+      <div class="sub" id="c-calls-hoje"></div>
+    </div>
+    <div class="card c-purple">
+      <div class="label">Conversão</div>
+      <div class="value" id="c-conv">0%</div>
+      <div class="sub">contato → agendamento</div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="section-title">Pipeline de Leads</div>
+  <div class="pipeline">
+    <div class="pipe-col">
+      <div class="pipe-label"><span style="color:#3b82f6">●</span> Novos</div>
+      <div class="pipe-num" id="p-novos">0</div>
+      <div class="pipe-bar" style="background:#3b82f6"></div>
+    </div>
+    <div class="pipe-col">
+      <div class="pipe-label"><span style="color:#8b5cf6">●</span> Contactados</div>
+      <div class="pipe-num" id="p-cont">0</div>
+      <div class="pipe-bar" style="background:#8b5cf6"></div>
+    </div>
+    <div class="pipe-col">
+      <div class="pipe-label"><span style="color:#f59e0b">●</span> Responderam</div>
+      <div class="pipe-num" id="p-resp">0</div>
+      <div class="pipe-bar" style="background:#f59e0b"></div>
+    </div>
+    <div class="pipe-col">
+      <div class="pipe-label"><span style="color:#10b981">●</span> Qualificados</div>
+      <div class="pipe-num" id="p-qual">0</div>
+      <div class="pipe-bar" style="background:#10b981"></div>
+    </div>
+    <div class="pipe-col">
+      <div class="pipe-label"><span style="color:#ec4899">●</span> Call Agendada</div>
+      <div class="pipe-num" id="p-age">0</div>
+      <div class="pipe-bar" style="background:#ec4899"></div>
+    </div>
+  </div>
+
+  <!-- Fontes + Intent -->
+  <div class="grid2">
+    <div class="box">
+      <div class="section-title">Fontes de Leads</div>
+      <div id="src-box"><div style="color:#444">Carregando...</div></div>
+    </div>
+    <div class="box">
+      <div class="section-title">Intent Score</div>
+      <div id="int-box"><div style="color:#444">Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- Canais × Ações -->
+  <div class="section-title">Leads por Canal e Ação</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px" id="channels-grid">
+
+    <div class="box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span style="font-size:20px">📸</span>
+        <span style="font-weight:700;color:#fff">Instagram DM</span>
+      </div>
+      <div id="ch-ig"></div>
+    </div>
+
+    <div class="box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span style="font-size:20px">📱</span>
+        <span style="font-weight:700;color:#fff">WhatsApp</span>
+      </div>
+      <div id="ch-wa"></div>
+    </div>
+
+    <div class="box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span style="font-size:20px">📧</span>
+        <span style="font-weight:700;color:#fff">Email</span>
+      </div>
+      <div id="ch-em"></div>
+    </div>
+
+  </div>
+
+  <!-- Fila + Log -->
+  <div class="grid2">
+    <div class="box">
+      <div class="section-title">Leads na Fila</div>
+      <div id="queue-box"><div style="color:#444">Carregando...</div></div>
+    </div>
+    <div class="box" style="padding:0">
+      <div class="section-title" style="padding:14px 16px 0">Log em Tempo Real</div>
+      <div class="log-box" id="log-box" style="margin:8px;height:190px">
+        <div class="log-line">Aguardando logs...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="box">
+    <div class="section-title" style="margin-bottom:14px">Leads Recentes</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th><th>Nicho</th><th>Fonte</th><th>Intent</th><th>Canal</th><th>Status</th><th>Contactado em</th>
+        </tr>
+      </thead>
+      <tbody id="leads-tb">
+        <tr><td colspan="7" style="color:#444;text-align:center;padding:20px">Nenhum lead ainda. Rode o pipeline primeiro.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const TOKEN = "{{ token }}";
+
+async function api(path) {
+  try {
+    const sep = path.includes('?') ? '&' : '?';
+    const r = await fetch(path + sep + 'token=' + TOKEN);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+function srcRow(label, val, total, color) {
+  const pct = total > 0 ? Math.round(val / total * 100) : 0;
+  return `<div class="src-row">
+    <span class="src-label">${label}</span>
+    <div class="src-bar-wrap"><div class="src-bar" style="width:${pct}%;background:${color}"></div></div>
+    <span class="src-val">${val}</span>
+  </div>`;
+}
+
+function badgeIntent(s) {
+  const m = {high:'bh',medium:'bm',low:'bl'};
+  return `<span class="badge ${m[s]||'bl'}">${s}</span>`;
+}
+function badgeSrc(s) {
+  const m = {instagram:'bi', apollo_intent:'ba', google_maps:'bg', meta:'ba', google_ads:'bl'};
+  const l = {instagram:'Instagram', apollo_intent:'Prospecção IA', google_maps:'Maps', meta:'Meta Ads', google_ads:'Google Ads'};
+  return `<span class="badge ${m[s]||'bl'}">${l[s]||s}</span>`;
+}
+function statusTxt(l) {
+  if (l.call_scheduled) return '<span style="color:#ec4899">📅 Agendada</span>';
+  if (l.qualified)      return '<span style="color:#4ade80">✅ Qualificado</span>';
+  if (l.responded)      return '<span style="color:#fbbf24">💬 Respondeu</span>';
+  if (l.whatsapp_contacted || l.contacted) return '<span style="color:#60a5fa">📤 Enviado</span>';
+  return '<span style="color:#444">—</span>';
+}
+
+async function loadAll() {
+  const [stats, leads] = await Promise.all([api('/api/stats'), api('/api/leads/recent')]);
+
+  if (stats) {
+    const ig = stats.instagram || {};
+    const wa = stats.whatsapp  || {};
+    const fn = stats.funnel    || {};
+    const sr = stats.sources   || {};
+    const it = stats.intent_breakdown || {};
+
+    document.getElementById('c-total').textContent = stats.total_leads_db || 0;
+    document.getElementById('c-hoje').textContent  = (ig.contacted_today||0) + (wa.contacted_today||0);
+    document.getElementById('c-resp').textContent  = fn.replied || 0;
+    document.getElementById('c-calls').textContent = fn.calls_scheduled_total || 0;
+    document.getElementById('c-conv').textContent  = fn.conversion_rate || '0%';
+    if (fn.calls_scheduled_today) document.getElementById('c-calls-hoje').textContent = fn.calls_scheduled_today + ' hoje';
+
+    document.getElementById('p-novos').textContent = stats.total_leads_db || 0;
+    document.getElementById('p-cont').textContent  = (ig.contacted_total||0) + (wa.contacted_total||0);
+    document.getElementById('p-resp').textContent  = fn.replied || 0;
+    document.getElementById('p-age').textContent   = fn.calls_scheduled_total || 0;
+
+    const totalSrc = (sr.instagram||0) + (sr.apollo_intent||0) + (sr.google_maps||0);
+    document.getElementById('src-box').innerHTML =
+      srcRow('📸 Instagram', sr.instagram||0, totalSrc||1, '#8b5cf6') +
+      srcRow('🎯 Prospecção IA', sr.apollo_intent||0, totalSrc||1, '#3b82f6') +
+      srcRow('🗺️ Google Maps', sr.google_maps||0, totalSrc||1, '#10b981') +
+      srcRow('📣 Meta Ads', sr.meta_ads||0, totalSrc||1, '#1877f2') +
+      srcRow('🔍 Google Ads', sr.google_ads||0, totalSrc||1, '#ea4335');
+
+    const totalInt = (it.high||0) + (it.medium||0) + (it.low||0);
+    document.getElementById('int-box').innerHTML =
+      srcRow('🔥 High Intent', it.high||0, totalInt||1, '#4ade80') +
+      srcRow('🟡 Medium', it.medium||0, totalInt||1, '#fbbf24') +
+      srcRow('⚪ Low', it.low||0, totalInt||1, '#6b7280');
+  }
+
+  if (leads && leads.length) {
+    document.getElementById('p-qual').textContent = leads.filter(l => l.qualified).length;
+    document.getElementById('leads-tb').innerHTML = leads.map(l => `
+      <tr>
+        <td>${l.full_name || l.username || '—'}</td>
+        <td style="color:#666">${l.niche || '—'}</td>
+        <td>${badgeSrc(l.source)}</td>
+        <td>${badgeIntent(l.intent_score)}</td>
+        <td style="color:#666">${l.phone ? '📱 WA' : l.username ? '📸 IG' : '📧 Email'}</td>
+        <td>${statusTxt(l)}</td>
+        <td style="color:#444;font-size:11px">${l.contacted_at ? new Date(l.contacted_at).toLocaleString('pt-BR') : '—'}</td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('last-upd').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR');
+}
+
+async function loadLogs() {
+  const r = await api('/api/logs?lines=40');
+  if (!r || !r.lines || !r.lines.length) return;
+  const box = document.getElementById('log-box');
+  box.innerHTML = r.lines.map(line => {
+    let cls = 'log-line';
+    if (line.includes('[ERROR]') || line.includes('[CRITICAL]')) cls += ' log-error';
+    else if (line.includes('[WARNING]')) cls += ' log-warn';
+    else if (line.includes('[INFO]')) cls += ' log-info';
+    return `<div class="${cls}">${line}</div>`;
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+async function loadQueue() {
+  const q = await api('/api/leads/queue');
+  if (!q) return;
+  const total = q.total || 1;
+  document.getElementById('queue-box').innerHTML =
+    srcRow('📸 Instagram DM', q.instagram||0, total, '#8b5cf6') +
+    srcRow('📱 WhatsApp', q.whatsapp||0, total, '#25d366') +
+    srcRow('📧 Email', q.email||0, total, '#60a5fa');
+}
+
+async function checkStatus() {
+  const r = await api('/api/campaign/status');
+  if (!r) return;
+  const el = document.getElementById('camp-status');
+  if (r.running) {
+    el.innerHTML = '<span class="dot dot-on"></span>Rodando';
+    document.getElementById('btn-start').style.display = 'none';
+    document.getElementById('btn-stop').style.display  = '';
+  } else {
+    el.innerHTML = '<span class="dot dot-off"></span>Parado';
+    document.getElementById('btn-start').style.display = '';
+    document.getElementById('btn-stop').style.display  = 'none';
+  }
+}
+
+async function startCamp() {
+  await fetch('/api/campaign/start?token=' + TOKEN, {method:'POST'});
+  setTimeout(checkStatus, 1000);
+}
+async function stopCamp() {
+  await fetch('/api/campaign/stop?token=' + TOKEN, {method:'POST'});
+  setTimeout(checkStatus, 1000);
+}
+
+function metricRow(label, val, color) {
+  return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1a1a24">
+    <span style="font-size:12px;color:#666">${label}</span>
+    <span style="font-size:16px;font-weight:700;color:${color||'#fff'}">${val}</span>
+  </div>`;
+}
+
+async function loadChannels() {
+  const r = await api('/api/channels/stats');
+  if (!r) return;
+
+  const ig = r.instagram;
+  document.getElementById('ch-ig').innerHTML =
+    metricRow('Na fila', ig.na_fila, '#60a5fa') +
+    metricRow('Enviados hoje', ig.enviados_hoje, '#fff') +
+    metricRow('Total enviados', ig.enviados_total, '#aaa') +
+    metricRow('Responderam', ig.responderam, '#fbbf24') +
+    metricRow('Qualificados', ig.qualificados, '#4ade80') +
+    metricRow('Agendados', ig.agendados, '#ec4899');
+
+  const wa = r.whatsapp;
+  document.getElementById('ch-wa').innerHTML =
+    metricRow('Na fila', wa.na_fila, '#60a5fa') +
+    metricRow('Enviados hoje', wa.enviados_hoje, '#fff') +
+    metricRow('Total enviados', wa.enviados_total, '#aaa') +
+    metricRow('Responderam', wa.responderam, '#fbbf24') +
+    metricRow('Qualificados', wa.qualificados, '#4ade80') +
+    metricRow('Agendados', wa.agendados, '#ec4899') +
+    metricRow('Inválidos', wa.invalidos, '#f87171');
+
+  const em = r.email;
+  document.getElementById('ch-em').innerHTML =
+    metricRow('Na fila', em.na_fila, '#60a5fa') +
+    metricRow('Total enviados', em.enviados_total, '#aaa') +
+    metricRow('Abertos', em.abertos, '#fbbf24') +
+    metricRow('Responderam', em.responderam, '#4ade80') +
+    metricRow('Bounced', em.bounced, '#f87171') +
+    metricRow('Agendados', em.agendados, '#ec4899');
+}
+
+// Init
+loadAll();
+loadLogs();
+loadQueue();
+checkStatus();
+loadChannels();
+setInterval(loadAll,     60000);
+setInterval(loadLogs,    15000);
+setInterval(loadQueue,   30000);
+setInterval(loadChannels,60000);
+setInterval(checkStatus,  8000);
+</script>
+</body>
+</html>
